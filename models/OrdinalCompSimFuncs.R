@@ -17,7 +17,7 @@ gen_sim_data = function(L=5,  # number of categories
                         N_is=500,  # number of in-sample seqs
                         N_oos=1000,  # number of out-of-sample seqs
                         zeta = 1e-12,  # compositional rounding,
-                        covariates=NA, 
+                        covariates=NULL, 
                         seed=round(runif(1, min=1, max=1e9))) {
   
   # set seed for reproducibility
@@ -31,8 +31,15 @@ gen_sim_data = function(L=5,  # number of categories
   
   # covariates #
   
-  covariates = covariates %>% sample_n(N, replace=F)
-  # note: if sample is too small, scaled binary params cause errors
+  if (!is.null(covariates)) {
+    covariates = covariates %>% sample_n(N, replace=F)
+    # note: if sample is too small, scaled binary params cause errors
+  } else {
+    covariates = rnorm(N*6, 0, 1) |> matrix(ncol=6)
+    colnames(covariates) = paste('Var', 1:ncol(covariates), sep='')
+    covariates = cbind(covariates, is_day=rbinom(N, 1, 0.5))
+    covariates = as.data.frame(covariates)
+  }
   
   # true data process #
   
